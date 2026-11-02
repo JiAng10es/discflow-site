@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Discflow — 让 CD 重新值得被听见</title>
+<meta name="description" content="Discflow 是一台装在 Windows 里的数字唱机。光驱直读 CD-DA，不抓轨、不压缩；双语逐字歌词；随封面变色的环境光。免安装单文件 13.9 MB。" />
+<meta name="theme-color" content="#000000" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Discflow — 让 CD 重新值得被听见" />
+<meta property="og:description" content="光驱直读 · 双语逐字歌词 · 无损归档。一台装在 Windows 里的数字唱机。" />
+<meta property="og:image" content="assets/hero-window.jpg" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='2' y='2' width='60' height='60' rx='15' fill='%23000'/%3E%3Ccircle cx='30' cy='32' r='16' fill='none' stroke='%23fff' stroke-width='3.4'/%3E%3Ccircle cx='30' cy='32' r='4.4' fill='%23fff'/%3E%3Ccircle cx='46.5' cy='17.5' r='3' fill='%23fff'/%3E%3Cpath d='M46.5 17.5v13.2l-7 6.2' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+
+<style>
+  /* ============================================================
+     设计令牌 —— 与应用内 :root 完全对齐
+     ============================================================ */
+  :root {
+    --bg: #000000;
+    --ink: rgba(255, 255, 255, 0.94);
+    --ink-2: rgba(255, 255, 255, 0.58);
+    --ink-3: rgba(255, 255, 255, 0.36);
+    --line: rgba(255, 255, 255, 0.11);
+    --line-soft: rgba(255, 255, 255, 0.06);
+    --accent: #ff375f;
+
+    /* 应用的 --spring-fluid / --spring-bounce */
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    --maxw: 1080px;
+    --pad: clamp(20px, 4vw, 40px);
+    --gap-section: clamp(72px, 8.5vw, 128px);
+
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+            "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+
+    /* 场景色：由各章节覆盖，用于光晕与强调 */
+    --tint: 200, 120, 60;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  ::selection { background: rgba(255, 55, 95, 0.32); }
+
+  a { color: inherit; text-decoration: none; }
+  img { display: block; max-width: 100%; height: auto; }
+
+  /* ============================================================
+     导航
+     ============================================================ */
+  .nav {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 90;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid transparent;
+    transition: background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease;
+  }
+  .nav.is-scrolled {
+    background: rgba(10, 10, 12, 0.7);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom-color: var(--line-soft);
+  }
+  .nav-in {
+    width: 100%;
+    max-width: var(--maxw);
+    padding: 0 var(--pad);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    justify-self: start;
+  }
+  .brand svg { width: 19px; height: 19px; flex-shrink: 0; }
+
+  .nav-links {
+    display: flex;
+    justify-self: center;
+    gap: 32px;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .nav-links a { transition: color 0.2s ease; }
+  .nav-links a:hover { color: var(--ink); }
+
+  .nav-dl {
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 16px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: #000;
+    justify-self: end;
+    transition: transform 0.3s var(--ease), opacity 0.2s ease;
+  }
+  .nav-dl:hover { transform: scale(1.05); opacity: 0.92; }
+
+  /* ============================================================
+     通用
+     ============================================================ */
+  .wrap {
+    width: 100%;
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 0 var(--pad);
+    position: relative;
+  }
+
+  section { position: relative; }
+
+  .eyebrow {
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgb(var(--tint));
+    margin-bottom: 18px;
+  }
+
+  h2 {
+    font-size: clamp(30px, 3.9vw, 48px);
+    line-height: 1.1;
+    letter-spacing: -0.028em;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+
+  .body-lg {
+    font-size: clamp(16.5px, 1.4vw, 19px);
+    line-height: 1.68;
+    color: var(--ink-2);
+    max-width: 560px;
+    text-wrap: pretty;
+  }
+  .body-lg + .body-lg { margin-top: 18px; }
+
+  /* ============================================================
+     首屏
+     ============================================================ */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    padding: clamp(112px, 13vh, 150px) 0 clamp(60px, 8vh, 90px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    --tint: 206, 118, 58;
+  }
+  .hero-glow {
+    position: absolute;
+    top: -18%;
+    left: 50%;
+    width: min(1320px, 128vw);
+    height: 900px;
+    transform: translateX(-50%);
+    background:
+      radial-gradient(closest-side, rgba(var(--tint), 0.30), transparent 70%),
+      radial-gradient(closest-side at 68% 62%, rgba(var(--tint), 0.16), transparent 72%);
+    filter: blur(30px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .hero .wrap { z-index: 1; }
+
+  .hero-copy { text-align: center; max-width: 880px; margin: 0 auto; }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: rgba(var(--tint), 1);
+    background: rgba(var(--tint), 0.12);
+    border: 1px solid rgba(var(--tint), 0.3);
+    padding: 6px 15px 6px 11px;
+    border-radius: 999px;
+    margin-bottom: 28px;
+  }
+  .pill i {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgb(var(--tint));
+    box-shadow: 0 0 10px rgba(var(--tint), 0.9);
+  }
+
+  h1 {
+    font-size: clamp(42px, 7.2vw, 92px);
+    line-height: 1.04;
+    letter-spacing: -0.038em;
+    font-weight: 700;
+    margin-bottom: 26px;
+  }
+
+  .hero-sub {
+    font-size: clamp(16.5px, 1.5vw, 20px);
+    line-height: 1.62;
+    color: var(--ink-2);
+    max-width: 620px;
+    margin: 0 auto 36px;
+    text-wrap: pretty;
+  }
+
+  .actions {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 13px 26px;
+    border-radius: 999px;
+    white-space: nowrap;
+    transition: transform 0.3s var(--ease), background 0.25s ease, box-shadow 0.3s ease;
+  }
+  .btn-solid {
+    background: rgb(var(--tint));
+    color: #1a0d05;
+    font-weight: 600;
+    box-shadow: 0 10px 36px rgba(var(--tint), 0.34);
+  }
+  .btn-solid:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 16px 44px rgba(var(--tint), 0.46); }
+  .btn-line {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+  .btn-line:hover { background: rgba(255, 255, 255, 0.14); transform: translateY(-2px); }
+
+  .footnote { font-size: 12.5px; color: var(--ink-3); }
+
+  /* 悬浮窗口 */
+  .window {
+    position: relative;
+    margin: clamp(44px, 6vw, 76px) auto 0;
+    max-width: 1000px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    background: #0c0c0e;
+    box-shadow:
+      0 50px 140px rgba(0, 0, 0, 0.9),
+      0 0 130px rgba(var(--tint), 0.16);
+  }
+  .window img { width: 100%; }
+
+  /* ============================================================
+     数字条
+     ============================================================ */
+  .stats {
+    border-top: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--line-soft);
+    background: linear-gradient(180deg, #09090b, #050506);
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding: clamp(38px, 5vw, 58px) 0;
+  }
+  .stat {
+    text-align: center;
+    padding: 0 12px;
+    border-right: 1px solid var(--line-soft);
+  }
+  .stat:last-child { border-right: 0; }
+  .stat b {
+    display: block;
+    font-size: clamp(24px, 2.8vw, 36px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin-bottom: 7px;
+  }
+  .stat b small { font-size: 0.5em; font-weight: 600; color: var(--ink-2); letter-spacing: 0; }
+  .stat span { font-size: 12.5px; color: var(--ink-3); letter-spacing: 0.01em; }
+
+  /* ============================================================
+     宣言
+     ============================================================ */
+  .manifesto {
+    padding: clamp(84px, 10.5vw, 148px) 0;
+    text-align: center;
+    overflow: hidden;
+  }
+  .manifesto h2 {
+    font-size: clamp(38px, 6.4vw, 84px);
+    line-height: 1.18;
+    letter-spacing: -0.038em;
+    margin-bottom: 34px;
+  }
+  .manifesto h2 em {
+    font-style: normal;
+    color: rgba(255, 255, 255, 0.34);
+  }
+  .manifesto p {
+    font-size: clamp(15px, 1.3vw, 17px);
+    color: var(--ink-3);
+    max-width: 460px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  /* ============================================================
+     图文特性
+     ============================================================ */
+  .feature {
+    padding: var(--gap-section) 0;
+    overflow: hidden;
+  }
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: clamp(36px, 5vw, 78px);
+    align-items: center;
+  }
+  .feature-grid.flip { grid-template-columns: 1.1fr 0.9fr; }
+  .feature-grid.flip .feature-copy { order: 2; }
+
+  .bullets {
+    list-style: none;
+    margin-top: 26px;
+    display: grid;
+    gap: 13px;
+  }
+  .bullets li {
+    display: flex;
+    gap: 11px;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--ink-2);
+  }
+  .bullets li::before {
+    content: "";
+    flex: 0 0 auto;
+    width: 5px; height: 5px;
+    margin-top: 8px;
+    border-radius: 50%;
+    background: rgb(var(--tint));
+  }
+
+  .figure {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    background: #0c0c0e;
+    box-shadow: 0 34px 90px rgba(0, 0, 0, 0.75), 0 0 90px rgba(var(--tint), 0.1);
+  }
+  .figure img { width: 100%; }
+
+  .data-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 26px;
+    margin-top: 30px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line-soft);
+    font-size: 13.5px;
+    color: var(--ink-3);
+  }
+  .data-strip b { color: var(--ink); font-weight: 600; margin-right: 5px; }
+
+  /* ============================================================
+     歌词（全宽居中 + 动效）
+     ============================================================ */
+  .lyrics-sec {
+    padding: var(--gap-section) 0;
+    text-align: center;
+    overflow: hidden;
+    --tint: 206, 118, 58;
+  }
+  .lyrics-sec .body-lg {
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .lyrics-sec .data-strip { justify-content: center; }
+
+  .motion {
+    position: relative;
+    margin: clamp(36px, 4.4vw, 56px) auto 0;
+    max-width: 820px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    background: #0c0c0e;
+    box-shadow: 0 40px 110px rgba(0, 0, 0, 0.8), 0 0 110px rgba(var(--tint), 0.14);
+  }
+  .motion img { width: 100%; }
+
+  /* ============================================================
+     环境光
+     ============================================================ */
+  .ambient {
+    padding: var(--gap-section) 0;
+    overflow: hidden;
+    --tint: 47, 143, 168;
+  }
+  .ambient-head { text-align: center; max-width: 700px; margin: 0 auto; }
+  .ambient-head .body-lg {
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(14px, 2vw, 22px);
+    margin-top: clamp(38px, 4.6vw, 58px);
+  }
+  .compare figure { margin: 0; }
+  .compare .figure { border-radius: 12px; }
+  .compare figcaption {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--ink-3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .compare figcaption i {
+    width: 8px; height: 8px; border-radius: 50%;
+    flex: 0 0 auto;
+  }
+  .swatch-teal { background: #2f8fa8; }
+  .swatch-grey { background: #9a9aa2; }
+
+  /* ============================================================
+     资料库（全宽出血）
+     ============================================================ */
+  .library-sec {
+    padding: var(--gap-section) 0;
+    overflow: hidden;
+    --tint: 190, 190, 200;
+  }
+  .bleed {
+    position: relative;
+    margin: clamp(38px, 4.6vw, 58px) auto 0;
+    max-width: 1240px;
+    padding: 0 var(--pad);
+  }
+  .bleed .figure { border-radius: 16px; }
+
+  /* ============================================================
+     规格
+     ============================================================ */
+  .specs {
+    padding: var(--gap-section) 0;
+    border-top: 1px solid var(--line-soft);
+    --tint: 190, 190, 200;
+  }
+  .spec-list {
+    margin-top: clamp(34px, 4vw, 50px);
+    border-top: 1px solid var(--line-soft);
+  }
+  .spec-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 24px;
+    padding: 19px 2px;
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 15px;
+  }
+  .spec-row dt { color: var(--ink-3); font-size: 14px; }
+  .spec-row dd { color: var(--ink); line-height: 1.6; }
+
+  /* ============================================================
+     CTA
+     ============================================================ */
+  .cta {
+    padding: clamp(110px, 14vw, 190px) 0 clamp(100px, 11vw, 140px);
+    text-align: center;
+    overflow: hidden;
+    --tint: 255, 55, 95;
+    background: radial-gradient(ellipse 62% 58% at 50% 0%, rgba(255, 55, 95, 0.13), transparent 68%);
+  }
+  .cta h2 {
+    font-size: clamp(38px, 5.8vw, 74px);
+    line-height: 1.08;
+    letter-spacing: -0.034em;
+    margin-bottom: 22px;
+  }
+  .cta p {
+    font-size: clamp(16px, 1.4vw, 18px);
+    color: var(--ink-2);
+    max-width: 520px;
+    margin: 0 auto 36px;
+    line-height: 1.7;
+  }
+
+  /* ============================================================
+     页脚
+     ============================================================ */
+  footer {
+    border-top: 1px solid var(--line-soft);
+    padding: 44px 0 60px;
+    font-size: 12.5px;
+    line-height: 1.8;
+    color: var(--ink-3);
+  }
+  .foot-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .foot-brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-2);
+  }
+  .foot-brand svg { width: 18px; height: 18px; }
+  .foot-links { display: flex; gap: 24px; flex-wrap: wrap; }
+  .foot-links a:hover { color: var(--ink-2); }
+
+  /* ============================================================
+     滚动入场
+     ============================================================ */
+  .rv {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
+  }
+  .rv.in { opacity: 1; transform: none; }
+  .rv.d1 { transition-delay: 0.08s; }
+  .rv.d2 { transition-delay: 0.16s; }
+  .rv.d3 { transition-delay: 0.24s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .rv { opacity: 1; transform: none; transition: none; }
+    * { animation: none !important; }
+  }
+
+  /* ============================================================
+     响应式
+     ============================================================ */
+  @media (max-width: 900px) {
+    .nav-links { display: none; }
+    .feature-grid, .feature-grid.flip { grid-template-columns: 1fr; }
+    .feature-grid.flip .feature-copy { order: 0; }
+    .stats-grid { grid-template-columns: 1fr 1fr; gap: 32px 0; }
+    .stat:nth-child(2) { border-right: 0; }
+    .stat:nth-child(1), .stat:nth-child(2) {
+      border-bottom: 1px solid var(--line-soft);
+      padding-bottom: 32px;
+    }
+    .spec-row { grid-template-columns: 1fr; gap: 5px; }
+  }
+
+  @media (max-width: 640px) {
+    .compare { grid-template-columns: 1fr; }
+    .hero { padding-top: 100px; }
+    .manifesto h2 { font-size: clamp(34px, 9vw, 44px); }
+    .data-strip { gap: 8px 18px; font-size: 12.5px; }
+    .window, .figure, .motion { border-radius: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================ 导航 ============================ -->
+<nav class="nav" id="nav">
+  <div class="nav-in">
+    <a class="brand" href="#top">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+        <rect x="2" y="2" width="20" height="20" rx="5.5"/>
+        <circle cx="11.2" cy="12" r="5.3"/>
+        <circle cx="11.2" cy="12" r="1.5"/>
+        <circle cx="17.8" cy="6.8" r="1" fill="currentColor" stroke="none"/>
+      </svg>
+      <span>Discflow</span>
+    </a>
+    <div class="nav-links">
+      <a href="#read">光驱直读</a>
+      <a href="#lyrics">歌词</a>
+      <a href="#ambient">环境光</a>
+      <a href="#theme">主题</a>
+      <a href="#specs">规格</a>
+    </div>
+    <a class="nav-dl" href="#get">下载</a>
+  </div>
+</nav>
+
+<!-- ============================ 首屏 ============================ -->
+<header class="hero" id="top">
+  <div class="hero-glow"></div>
+  <div class="wrap">
+    <div class="hero-copy">
+      <div class="pill rv"><i></i>Discflow 2.0 · Windows</div>
+      <h1 class="rv d1">让 CD 重新<br />值得被听见。</h1>
+      <p class="hero-sub rv d2">
+        一束激光，一段没有被压缩过的声音。<br />
+        Discflow 直接读你的光驱 —— 不转码、不缓存、不改写。
+      </p>
+      <div class="actions rv d3">
+        <a class="btn btn-solid" href="https://github.com/JiAng10es/Discflow" target="_blank" rel="noopener noreferrer">
+          在 GitHub 上获取
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12m0 0l-4.5-4.5M12 16l4.5-4.5"/><path d="M4 19h16"/></svg>
+        </a>
+        <a class="btn btn-line" href="#read">看它怎么工作</a>
+      </div>
+      <p class="footnote rv d3">免安装 · 单文件 13.9 MB · Windows 10 / 11</p>
+    </div>
+
+    <div class="window rv d3">
+      <img src="assets/hero-window.jpg" width="1400" height="885"
+           alt="Discflow 播放界面：左侧是专辑封面，右侧是英文原文与中文译文双行歌词，当前句高亮，背景是随封面提取的琥珀色环境光" />
+    </div>
+  </div>
+</header>
+
+<!-- ============================ 数字 ============================ -->
+<section class="stats">
+  <div class="wrap">
+    <div class="stats-grid">
+      <div class="stat rv"><b>16<small> Bit</small></b><span>CD-DA 原生位深</span></div>
+      <div class="stat rv d1"><b>44.1<small> kHz</small></b><span>未重采样采样率</span></div>
+      <div class="stat rv d2"><b>0<small> 次</small></b><span>有损转码</span></div>
+      <div class="stat rv d3"><b>13.9<small> MB</small></b><span>免安装单文件</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 宣言 ============================ -->
+<section class="manifesto">
+  <div class="wrap">
+    <h2 class="rv">不抓轨。<br /><em>不压缩。</em><br />不打乱顺序。</h2>
+    <p class="rv d1">这三件事，今天的播放器几乎都不做了。</p>
+  </div>
+</section>
+
+<!-- ============================ 直读 ============================ -->
+<section class="feature" id="read" style="--tint: 190, 190, 200;">
+  <div class="wrap">
+    <div class="feature-grid">
+      <div class="feature-copy rv">
+        <div class="eyebrow">光驱直读</div>
+        <h2>插进去，<br />下一秒就是音乐。</h2>
+        <p class="body-lg">
+          大多数播放器要先把整张碟转成文件才能出声。Discflow 不走这条路 —— 它用 Win32 的光驱指令直接读 CDDA 原始扇区，边读边放。16-Bit / 44.1 kHz 原样出来，中间没有任何一次编码。
+        </p>
+        <ul class="bullets">
+          <li>自适应扇区批次：64 → 48 → 32 → 27 → 16，外置 USB 光驱也不断音</li>
+          <li>放盘、退盘、托盘就绪，实时感知</li>
+          <li>曲目信息优先读碟片自带的 CD-TEXT，读不到再联网</li>
+        </ul>
+      </div>
+      <div class="rv d1">
+        <div class="figure">
+          <img src="assets/queue.jpg" width="1400" height="885" loading="lazy"
+               alt="Discflow 的曲目列表：专辑名、DiscID、11 首曲目的时长，当前曲目带播放指示，右上角是顺序 / 随机 / 单曲三种播放模式" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 歌词 ============================ -->
+<section class="lyrics-sec" id="lyrics">
+  <div class="wrap">
+    <div class="eyebrow rv">双语逐字</div>
+    <h2 class="rv d1">一个字，<br />一个字地亮起来。</h2>
+    <p class="body-lg rv d2">
+      网易云、QQ 音乐、LRCLIB 三源同时取词，取回的是带时间轴的原文和译文。Discflow 把每一行拆成词块，按音节长度分配时长，跟着播放头一个一个点亮。
+    </p>
+    <p class="body-lg rv d2">
+      专辑匹配时会顺手记下每首歌的歌曲 ID。之后整张碟的歌词按 ID 直取 —— 11 首大约 8 秒跑完，不用一首一首等。
+    </p>
+    <div class="data-strip rv d3">
+      <span><b>3 源</b> 同时取词</span>
+      <span><b>逐字</b> 时间轴对齐</span>
+      <span><b>双语</b> 同屏显示</span>
+    </div>
+
+    <div class="motion rv d3" data-motion="assets/motion-lyrics.webp">
+      <img src="assets/motion-lyrics-poster.jpg" width="820" height="685"
+           alt="歌词逐字点亮：英文原文与中文译文双行，当前句高亮放大，其余行柔焦虚化" />
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 环境光 ============================ -->
+<section class="ambient" id="ambient">
+  <div class="wrap">
+    <div class="ambient-head">
+      <div class="eyebrow rv">环境光</div>
+      <h2 class="rv d1">封面是什么颜色，<br />房间就是什么颜色。</h2>
+      <p class="body-lg rv d2">
+        从封面里提取主色，生成一层会缓慢流动的弥散光斑。换一张黑白人像，整屏跟着冷下来；换一张青色封面，房间就变成海水的颜色。
+      </p>
+    </div>
+
+    <div class="compare">
+      <figure class="rv">
+        <div class="figure">
+          <img src="assets/palette-teal.jpg" width="1400" height="885" loading="lazy"
+               alt="BLU-SWING 的青色封面，把整个播放界面染成深青色" />
+        </div>
+        <figcaption><i class="swatch-teal"></i>BLU-SWING · 青</figcaption>
+      </figure>
+      <figure class="rv d1">
+        <div class="figure">
+          <img src="assets/palette-grey.jpg" width="1400" height="885" loading="lazy"
+               alt="藤井風的黑白人像封面，界面随之变成中性的冷灰" />
+        </div>
+        <figcaption><i class="swatch-grey"></i>藤井風 · 黑白</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 资料库 ============================ -->
+<section class="library-sec" id="library">
+  <div class="wrap">
+    <div class="eyebrow rv">资料库</div>
+    <h2 class="rv d1">把唱片留下来。</h2>
+    <p class="body-lg rv d2">
+      可以把 CD 逐扇区无损转录成 WAV，连同封面、曲目、歌词一起归档。以后不用插盘，点开就能听。整库支持 ZIP 导出导入，换台电脑解压即用。
+    </p>
+    <div class="data-strip rv d2">
+      <span><b>12</b> 张唱片</span>
+      <span><b>149</b> 首曲目</span>
+      <span><b>1</b> 个文件夹搬走</span>
+    </div>
+  </div>
+  <div class="bleed rv d3">
+    <div class="figure">
+      <img src="assets/library.jpg" width="1400" height="885" loading="lazy"
+           alt="资料库：四列唱片货架，每张卡片是一张专辑封面，封面后透出黑胶唱片，下方是曲目数与总时长" />
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 匹配 ============================ -->
+<section class="feature" id="match" style="--tint: 190, 190, 200;">
+  <div class="wrap">
+    <div class="feature-grid flip">
+      <div class="feature-copy rv">
+        <div class="eyebrow">元数据</div>
+        <h2>连一张冷门碟，<br />也认真对待。</h2>
+        <p class="body-lg">
+          MusicBrainz DiscID 精确匹配，TOC 时长加权兜底，还有 GNUDb / FreeDB 备选。都对不上时，QQ 音乐、iTunes、网易云三源并发检索，手动挑一条套用整张。
+        </p>
+        <p class="body-lg">
+          曲库里那些 Shift-JIS 误解码的残次条目（把「ー・ママ」变成「蕙」），会被识别出来排到最后，绝不写进你的资料库。
+        </p>
+      </div>
+      <div class="rv d1">
+        <div class="figure">
+          <img src="assets/match.jpg" width="900" height="975" loading="lazy"
+               alt="手动匹配歌词弹窗：同时列出网易云与 QQ 音乐的候选，标注来源、行数、是否有译文与逐字时间轴、时间偏移" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 双主题 ============================ -->
+<section class="feature" id="theme" style="--tint: 198, 198, 208;">
+  <div class="wrap">
+    <div class="feature-grid">
+      <div class="feature-copy rv">
+        <div class="eyebrow">双主题</div>
+        <h2>深色，<br />或者浅色。</h2>
+        <p class="body-lg">
+          两套完整配色，不是简单反色 —— 分隔线、阴影、玻璃层次都单独调过。右上角一键切换，环境光跟着变浅，字反而更清楚。
+        </p>
+      </div>
+      <div class="rv d1">
+        <div class="figure">
+          <img src="assets/light.jpg" width="1400" height="885" loading="lazy"
+               alt="浅色主题下的同一个播放界面：浅灰渐变背景、深色文字，歌词与高亮依然清晰" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 规格 ============================ -->
+<section class="specs" id="specs">
+  <div class="wrap">
+    <div class="eyebrow rv">规格</div>
+    <h2 class="rv d1">技术参数</h2>
+    <dl class="spec-list rv d1">
+      <div class="spec-row"><dt>音频格式</dt><dd>CD-DA · 16-Bit / 44.1 kHz 立体声，未重采样、未压缩</dd></div>
+      <div class="spec-row"><dt>读取方式</dt><dd>Win32 <code>IOCTL_CDROM_RAW_READ</code> 逐扇区直读，<code>winmm.dll</code> waveOut 输出</dd></div>
+      <div class="spec-row"><dt>自适应批次</dt><dd>64 / 48 / 32 / 27 / 16 扇区自动降级</dd></div>
+      <div class="spec-row"><dt>归档格式</dt><dd>逐扇区无损转录 WAV + album.json + 封面</dd></div>
+      <div class="spec-row"><dt>元数据来源</dt><dd>CD-TEXT · MusicBrainz · GNUDb / FreeDB · QQ 音乐 · iTunes · 网易云</dd></div>
+      <div class="spec-row"><dt>歌词来源</dt><dd>网易云 · QQ 音乐 · LRCLIB（原文 + 译文，逐字时间轴）</dd></div>
+      <div class="spec-row"><dt>界面</dt><dd>WebView2 + 原生 HTML / CSS / JavaScript</dd></div>
+      <div class="spec-row"><dt>系统要求</dt><dd>Windows 10 / 11（64 位），需 WebView2 运行时</dd></div>
+      <div class="spec-row"><dt>发行形式</dt><dd>免安装单文件 EXE，约 13.9 MB</dd></div>
+      <div class="spec-row"><dt>授权</dt><dd>CC BY-NC 4.0，禁止商用</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- ============================ CTA ============================ -->
+<section class="cta" id="get">
+  <div class="wrap">
+    <h2 class="rv">唱片还在，<br />声音也应该在。</h2>
+    <p class="rv d1">把抽屉里那张 CD 重新放进光驱。<br />免安装、不写注册表、不驻留后台。</p>
+    <div class="actions rv d2">
+      <a class="btn btn-solid" href="https://github.com/JiAng10es/Discflow" id="dlBtn" target="_blank" rel="noopener noreferrer">
+        把唱片放回去
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13m0 0l-5-5m5 5l-5 5"/></svg>
+      </a>
+    </div>
+    <p class="footnote rv d2">Windows 10 / 11 · 64 位 · 13.9 MB</p>
+    <p class="footnote rv d2" style="margin-top:14px;">源码与发行版都在 GitHub · CC BY-NC 4.0，禁止商用</p>
+  </div>
+</section>
+
+<!-- ============================ 页脚 ============================ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+          <rect x="2" y="2" width="20" height="20" rx="5.5"/>
+          <circle cx="11.2" cy="12" r="5.3"/>
+          <circle cx="11.2" cy="12" r="1.5"/>
+        </svg>
+        <span>Discflow</span>
+      </div>
+      <div class="foot-links">
+        <a href="#read">光驱直读</a>
+        <a href="#lyrics">歌词</a>
+        <a href="#ambient">环境光</a>
+        <a href="#library">资料库</a>
+        <a href="#specs">规格</a>
+      </div>
+    </div>
+    <p>
+      Discflow 是个人非商业项目，采用 CC BY-NC 4.0 授权：允许自由分享与修改，禁止任何形式的商业使用。<br />
+      所有音乐、封面与歌词版权归各自权利人所有，本软件仅用于播放你合法拥有的唱片。
+    </p>
+    <p style="margin-top:12px;">© 2026 Discflow · 2.0.0</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- 导航滚动态 ---------- */
+  var nav = document.getElementById('nav');
+  var onScroll = function () {
+    nav.classList.toggle('is-scrolled', window.scrollY > 20);
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* ---------- 入场淡入 ---------- */
+  var revealables = document.querySelectorAll('.rv');
+  if (reduceMotion || !('IntersectionObserver' in window)) {
+    revealables.forEach(function (el) { el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -6% 0px' });
+    revealables.forEach(function (el) { io.observe(el); });
+  }
+
+  /* ---------- 动效懒加载：进入视口才换成 WebP ---------- */
+  var motions = document.querySelectorAll('[data-motion]');
+  var loadMotion = function (box) {
+    var img = box.querySelector('img');
+    if (!img || img.dataset.loaded) return;
+    img.dataset.loaded = '1';
+    var probe = new Image();
+    probe.onload = function () { img.src = probe.src; };
+    probe.src = box.getAttribute('data-motion');
+  };
+
+  if (reduceMotion || !('IntersectionObserver' in window)) {
+    /* 用户要求减少动效：保持静帧，永不加载 WebP */
+  } else {
+    var mio = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          loadMotion(e.target);
+          mio.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: '200px 0px' });
+    motions.forEach(function (el) { mio.observe(el); });
+  }
+
+  /* ---------- 锚点平滑滚动（补偿固定导航高度） ---------- */
+  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+    a.addEventListener('click', function (ev) {
+      var id = a.getAttribute('href');
+      if (!id || id === '#') return;
+      var target = document.querySelector(id);
+      if (!target) return;
+      ev.preventDefault();
+      var y = target.getBoundingClientRect().top + window.scrollY - 56;
+      window.scrollTo({ top: y, behavior: reduceMotion ? 'auto' : 'smooth' });
+    });
+  });
+
+})();
+</script>
+</body>
+</html>
