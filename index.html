@@ -171,7 +171,8 @@
     flex-direction: column;
     justify-content: center;
     overflow: hidden;
-    --tint: 206, 118, 58;
+    /* 平成風俗封面是黑白照片，环境光近乎纯黑；用冷银灰做强调，避免强行染色 */
+    --tint: 214, 210, 222;
   }
   .hero-glow {
     position: absolute;
@@ -247,7 +248,7 @@
   }
   .btn-solid {
     background: rgb(var(--tint));
-    color: #1a0d05;
+    color: #14120f;
     font-weight: 600;
     box-shadow: 0 10px 36px rgba(var(--tint), 0.34);
   }
@@ -643,7 +644,7 @@
 
     <div class="window rv d3">
       <img src="assets/hero-window.jpg" width="1400" height="885"
-           alt="Discflow 播放界面：左侧是专辑封面，右侧是英文原文与中文译文双行歌词，当前句高亮，背景是随封面提取的琥珀色环境光" />
+           alt="Discflow 播放界面：左侧是《平成風俗》的黑白浴缸封面，右侧是日文原文与中文译文双行歌词，当前句高亮，背景是随封面提取的深灰环境光" />
     </div>
   </div>
 </header>
