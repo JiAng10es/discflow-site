@@ -171,8 +171,8 @@
     flex-direction: column;
     justify-content: center;
     overflow: hidden;
-    /* 平成風俗封面是黑白照片，环境光近乎纯黑；用冷银灰做强调，避免强行染色 */
-    --tint: 214, 210, 222;
+    /* 禁じ手封面是米白底 + 一抹正红；环境光为深绯，取封面主红做强调 */
+    --tint: 208, 18, 38;
   }
   .hero-glow {
     position: absolute;
@@ -259,6 +259,24 @@
     border: 1px solid var(--line);
   }
   .btn-line:hover { background: rgba(255, 255, 255, 0.14); transform: translateY(-2px); }
+
+  /* 首屏深绯环境光下，实心按钮改用封面同款米白，避免红上叠红；
+     胶囊标签的红色文字也提亮一档，否则在暗红底上看不清 */
+  .hero .btn-solid {
+    background: #f4f1ea;
+    color: #1a1216;
+    box-shadow: 0 10px 36px rgba(255, 255, 255, 0.16);
+  }
+  .hero .btn-solid:hover { box-shadow: 0 16px 44px rgba(255, 255, 255, 0.26); }
+  .hero .pill {
+    color: rgb(255, 150, 160);
+    background: rgba(208, 18, 38, 0.16);
+    border-color: rgba(255, 150, 160, 0.32);
+  }
+  .hero .pill i {
+    background: rgb(255, 150, 160);
+    box-shadow: 0 0 10px rgba(255, 150, 160, 0.9);
+  }
 
   .footnote { font-size: 12.5px; color: var(--ink-3); }
 
@@ -644,7 +662,7 @@
 
     <div class="window rv d3">
       <img src="assets/hero-window.jpg" width="1400" height="885"
-           alt="Discflow 播放界面：左侧是《平成風俗》的黑白浴缸封面，右侧是日文原文与中文译文双行歌词，当前句高亮，背景是随封面提取的深灰环境光" />
+           alt="Discflow 播放界面：左侧是《禁じ手》的米白封面与正红方块，右侧是日文原文与中文译文双行歌词，当前句高亮，背景是随封面提取的深绯环境光" />
     </div>
   </div>
 </header>
