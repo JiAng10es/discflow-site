@@ -141,6 +141,7 @@ button {
   width: 24px;
   height: 24px;
   border-radius: 6px;
+  border: 1px solid var(--border-medium);
 }
 
 .nav-links {
