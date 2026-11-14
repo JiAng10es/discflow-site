@@ -1,756 +1,362 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Discflow —— 让 CD 重新值得被听见</title>
-<meta name="description" content="Discflow 是一款为 Windows 打造的 Hi-Fi CD 音乐播放器。光驱硬件直读、双语逐字歌词、无损转录归档，把实体唱片重新放回你的桌面。" />
-<meta property="og:type" content="website" />
-<meta property="og:title" content="Discflow —— 让 CD 重新值得被听见" />
-<meta property="og:description" content="16-Bit / 44.1 kHz 光驱硬件直读，双语逐字歌词，无损转录归档。免安装单文件 13.9 MB。" />
-<meta property="og:image" content="assets/hero_fujii_player_dark.png" />
-<meta name="theme-color" content="#0a0a0c" />
-<link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
-
-<style>
-  :root {
-    --bg-dark: #0a0a0c;
-    --bg-light: #f4f1ea;
-    --text-primary: #f5f5f7;
-    --text-secondary: rgba(255, 255, 255, 0.62);
-    --text-muted: rgba(255, 255, 255, 0.42);
-    --accent: #ff375f;
-    --border-hairline: rgba(255, 255, 255, 0.08);
-    --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    --ease-apple: cubic-bezier(0.22, 1, 0.36, 1);
-    --max-content: 1440px;
-    --text-col: 780px;
-  }
-
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  html {
-    scroll-behavior: smooth;
-    -webkit-text-size-adjust: 100%;
-    background-color: var(--bg-dark);
-    color: var(--text-primary);
-  }
-
-  body {
-    font-family: var(--font-stack);
-    background-color: var(--bg-dark);
-    color: var(--text-primary);
-    overflow-x: hidden;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  /* 顶栏 Apple 极简导航条 */
-  .global-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 48px;
-    z-index: 100;
-    background: rgba(10, 10, 12, 0.82);
-    backdrop-filter: saturate(180%) blur(20px);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    border-bottom: 1px solid var(--border-hairline);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 24px;
-    transition: background 0.3s ease;
-  }
-
-  .nav-inner {
-    width: 100%;
-    max-width: var(--max-content);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .nav-brand {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    color: #fff;
-    font-weight: 600;
-    font-size: 14px;
-    letter-spacing: -0.01em;
-  }
-
-  .nav-brand img {
-    width: 20px;
-    height: 20px;
-    display: block;
-  }
-
-  .nav-links {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-  }
-
-  .nav-links a {
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: 12.5px;
-    font-weight: 400;
-    transition: color 0.2s ease;
-  }
-
-  .nav-links a:hover {
-    color: #fff;
-  }
-
-  .nav-actions {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-
-  .btn-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 500;
-    text-decoration: none;
-    transition: transform 0.2s var(--ease-apple), background-color 0.2s ease, opacity 0.2s ease;
-    cursor: pointer;
-    border: none;
-    white-space: nowrap;
-  }
-
-  .btn-pill-primary {
-    background: #ffffff;
-    color: #000000;
-    padding: 6px 16px;
-  }
-
-  .btn-pill-primary:hover {
-    background: #e5e5ea;
-    transform: scale(1.02);
-  }
-
-  .btn-pill-hero {
-    background: #ffffff;
-    color: #000000;
-    padding: 12px 28px;
-    font-size: 15px;
-    font-weight: 600;
-  }
-
-  .btn-pill-hero:hover {
-    background: #e5e5ea;
-    transform: scale(1.02);
-  }
-
-  .btn-pill-secondary {
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    padding: 12px 26px;
-    font-size: 15px;
-    font-weight: 500;
-  }
-
-  .btn-pill-secondary:hover {
-    background: rgba(255, 255, 255, 0.18);
-  }
-
-  .btn-link {
-    color: #2997ff;
-    text-decoration: none;
-    font-size: 15px;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    transition: color 0.2s ease;
-  }
-
-  .btn-link:hover {
-    text-decoration: underline;
-  }
-
-  /* 通用章节与排版容器 */
-  section {
-    position: relative;
-    width: 100%;
-  }
-
-  .content-text {
-    width: 100%;
-    max-width: var(--text-col);
-    margin: 0 auto;
-    padding: 0 24px;
-    text-align: center;
-  }
-
-  .media-bleed {
-    width: 100%;
-    max-width: var(--max-content);
-    margin: 0 auto;
-    display: flex;
-    justify-content: center;
-  }
-
-  /* 严格贴边图片：绝不放大超过1440px，原图自带背景，禁止圆角/边框/投影 */
-  .bleed-img {
-    width: 100%;
-    max-width: 1440px;
-    height: auto;
-    display: block;
-    border-radius: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
-    filter: none !important;
-  }
-
-  /* 1. Hero 屏（深色中性底） */
-  .sec-hero {
-    padding-top: 130px;
-    padding-bottom: 60px;
-    text-align: center;
-    background: var(--bg-dark);
-  }
-
-  .hero-headline {
-    font-size: clamp(38px, 5.8vw, 68px);
-    font-weight: 700;
-    letter-spacing: -0.035em;
-    line-height: 1.08;
-    margin-bottom: 16px;
-    color: #ffffff;
-  }
-
-  .hero-subhead {
-    font-size: clamp(16px, 2.1vw, 21px);
-    color: var(--text-secondary);
-    line-height: 1.55;
-    letter-spacing: -0.01em;
-    max-width: 620px;
-    margin: 0 auto 32px;
-    font-weight: 400;
-  }
-
-  .hero-cta {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    margin-bottom: 54px;
-    flex-wrap: wrap;
-  }
-
-  /* 2. 数字规格条 */
-  .sec-stats {
-    padding: 56px 24px;
-    border-top: 1px solid var(--border-hairline);
-    border-bottom: 1px solid var(--border-hairline);
-    background: #08080a;
-  }
-
-  .stats-grid {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    text-align: center;
-  }
-
-  .stat-item {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .stat-val {
-    font-size: clamp(28px, 3.2vw, 38px);
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    color: #ffffff;
-  }
-
-  .stat-lbl {
-    font-size: 13px;
-    color: var(--text-secondary);
-    font-weight: 400;
-    letter-spacing: 0.01em;
-  }
-
-  /* 3. 宣言屏（纯文字大字） */
-  .sec-manifesto {
-    padding: 120px 24px;
-    text-align: center;
-    background: var(--bg-dark);
-  }
-
-  .manifesto-title {
-    font-size: clamp(34px, 5vw, 62px);
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    line-height: 1.14;
-    color: #ffffff;
-    margin-bottom: 24px;
-  }
-
-  .manifesto-desc {
-    font-size: clamp(16px, 2vw, 20px);
-    color: var(--text-secondary);
-    line-height: 1.65;
-    max-width: 640px;
-    margin: 0 auto;
-  }
-
-  /* 4. 歌词动效章节（暖琥珀） */
-  .sec-lyrics-dynamic {
-    padding: 90px 0 50px;
-    background: var(--bg-dark);
-  }
-
-  .section-kicker {
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-muted);
-    margin-bottom: 12px;
-  }
-
-  .section-title {
-    font-size: clamp(30px, 4vw, 48px);
-    font-weight: 700;
-    letter-spacing: -0.025em;
-    line-height: 1.15;
-    margin-bottom: 14px;
-    color: #ffffff;
-  }
-
-  .section-desc {
-    font-size: clamp(15px, 1.8vw, 18px);
-    color: var(--text-secondary);
-    line-height: 1.6;
-    margin-bottom: 44px;
-  }
-
-  /* 5. 歌词静态 + 封面 */
-  .sec-lyrics-static {
-    padding: 80px 0 50px;
-    background: var(--bg-dark);
-  }
-
-  /* 6. 浅色主题展示 */
-  .sec-themes {
-    padding: 100px 0 70px;
-    background: #0e0e11;
-    border-top: 1px solid var(--border-hairline);
-  }
-
-  .theme-switcher-wrap {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 40px;
-  }
-
-  .theme-segmented {
-    display: inline-flex;
-    background: rgba(255, 255, 255, 0.08);
-    padding: 3px;
-    border-radius: 999px;
-    border: 1px solid var(--border-hairline);
-  }
-
-  .theme-btn {
-    padding: 7px 20px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .theme-btn.active {
-    background: #ffffff;
-    color: #000000;
-    font-weight: 600;
-  }
-
-  .theme-preview-card {
-    display: none;
-    width: 100%;
-  }
-
-  .theme-preview-card.active {
-    display: block;
-  }
-
-  /* 7. 资料库章节 */
-  .sec-library {
-    padding: 90px 0 50px;
-    background: var(--bg-dark);
-  }
-
-  /* 8. 自定义能力章节 */
-  .sec-settings {
-    padding: 90px 0 50px;
-    background: var(--bg-dark);
-  }
-
-  /* 9. 底部 CTA 与声明 */
-  .sec-cta {
-    padding: 120px 24px 60px;
-    text-align: center;
-    background: var(--bg-dark);
-    border-top: 1px solid var(--border-hairline);
-  }
-
-  .cta-title {
-    font-size: clamp(34px, 4.6vw, 56px);
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    line-height: 1.15;
-    margin-bottom: 18px;
-    color: #ffffff;
-  }
-
-  .cta-sub {
-    font-size: clamp(15px, 1.8vw, 19px);
-    color: var(--text-secondary);
-    margin-bottom: 36px;
-  }
-
-  .cta-actions {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 32px;
-    flex-wrap: wrap;
-  }
-
-  .cta-meta {
-    font-size: 13px;
-    color: var(--text-muted);
-    line-height: 1.8;
-  }
-
-  .cta-meta a {
-    color: var(--text-secondary);
-    text-decoration: none;
-  }
-
-  .cta-meta a:hover {
-    text-decoration: underline;
-  }
-
-  /* 网页底部实时更新浏览量小字行 */
-  .pv-counter-row {
-    margin-top: 50px;
-    padding-top: 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    font-size: 12px;
-    color: var(--text-muted);
-    letter-spacing: 0.02em;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .pv-num {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", monospace;
-    color: var(--text-secondary);
-    font-weight: 500;
-  }
-
-  /* 移动端与平板响应式适配 */
-  @media (max-width: 1024px) {
-    .stats-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 28px;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .global-nav {
-      padding: 0 16px;
-    }
-    .nav-links {
-      display: none;
-    }
-    .sec-hero {
-      padding-top: 100px;
-      padding-bottom: 40px;
-    }
-    .sec-manifesto {
-      padding: 80px 20px;
-    }
-    .sec-lyrics-dynamic,
-    .sec-lyrics-static,
-    .sec-themes,
-    .sec-library,
-    .sec-settings {
-      padding: 60px 0 40px;
-    }
-    .sec-cta {
-      padding: 80px 20px 40px;
-    }
-  }
-
-  @media (max-width: 390px) {
-    .stats-grid {
-      grid-template-columns: 1fr;
-      gap: 20px;
-    }
-    .hero-cta, .cta-actions {
-      flex-direction: column;
-      width: 100%;
-    }
-    .btn-pill-hero, .btn-pill-secondary {
-      width: 100%;
-      text-align: center;
-    }
-  }
-
-  /* 减弱动画媒体查询：降级动态 WebP 动画为静态截图 */
-  @media (prefers-reduced-motion: reduce) {
-    .dynamic-karaoke-pic source {
-      display: none;
-    }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discflow — 献给实体唱片的 Windows 原生播放器</title>
+  <meta name="description" content="Discflow 是一款面向 Windows 的原生 Hi-Fi CD 与无损专辑播放器，支持光驱直读、WAV 无损归档、双语逐字歌词与黑白双主题。">
+  <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js" defer></script>
+  <script src="main.js" defer></script>
 </head>
 <body>
+  <a href="#main-content" class="sr-only">跳到正文</a>
 
-  <!-- 顶栏导航条 -->
-  <header class="global-nav">
-    <div class="nav-inner">
-      <a class="nav-brand" href="#hero">
-        <img src="assets/icon.svg" width="20" height="20" alt="Discflow Logo" />
+  <!-- Top Bar (Shares identical glass parameters with Bottom Bar) -->
+  <header class="site-header">
+    <nav class="nav-pill glass-bar" aria-label="主导航">
+      <a href="#hero" class="brand-link">
+        <img src="assets/icon.svg" alt="Discflow 图标" class="brand-icon" width="24" height="24">
         <span>Discflow</span>
       </a>
-      <nav class="nav-links">
-        <a href="#hero">硬件直读</a>
-        <a href="#manifesto">设计宣言</a>
-        <a href="#lyrics">双语歌词</a>
-        <a href="#themes">深浅主题</a>
-        <a href="#library">无损资料库</a>
-        <a href="#settings">系统设置</a>
-      </nav>
+
+      <ul class="nav-links">
+        <li><a href="#hero" class="nav-link">光驱直读</a></li>
+        <li><a href="#manifesto" class="nav-link">整张聆听</a></li>
+        <li><a href="#lyrics" class="nav-link">逐字歌词</a></li>
+        <li><a href="#themes" class="nav-link">黑白主题</a></li>
+        <li><a href="#library" class="nav-link">专辑资料库</a></li>
+        <li><a href="#settings" class="nav-link">偏好设置</a></li>
+      </ul>
+
       <div class="nav-actions">
-        <a class="btn-pill btn-pill-primary" href="https://github.com/JiAng10es/Discflow/releases/latest/download/Discflow.exe">下载 for Windows</a>
+        <a href="https://github.com/JiAng10es/Discflow" target="_blank" rel="noopener noreferrer" class="nav-ghost-link">GitHub 源码</a>
+        <a href="https://github.com/JiAng10es/Discflow/releases/latest/download/Discflow.exe" class="btn btn--primary btn--sm">
+          <i data-lucide="download" width="15" height="15"></i>
+          <span>下载 Windows 版</span>
+        </a>
+        <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" aria-label="打开导航菜单" aria-expanded="false" aria-controls="mobile-drawer">
+          <i data-lucide="menu" width="18" height="18"></i>
+        </button>
       </div>
-    </div>
+    </nav>
   </header>
 
-  <main>
-    <!-- 1. Hero 屏（深色藤井风，中性灰底） -->
-    <section class="sec-hero" id="hero">
-      <div class="content-text">
-        <h1 class="hero-headline">让 CD 重新<br>值得被听见。</h1>
-        <p class="hero-subhead">一束激光，一段没有被压缩过的声音。<br>Discflow 直接读你的光驱 —— 不转码、不缓存、不改写。</p>
-        <div class="hero-cta">
-          <a class="btn-pill btn-pill-hero" href="https://github.com/JiAng10es/Discflow/releases/latest/download/Discflow.exe">下载 for Windows</a>
-          <a class="btn-pill btn-pill-secondary" href="#manifesto">看它怎么工作</a>
+  <!-- Mobile Navigation Drawer -->
+  <div class="mobile-drawer glass-bar" id="mobile-drawer" role="dialog" aria-label="移动端导航">
+    <ul class="mobile-drawer-list">
+      <li><a href="#hero" class="mobile-drawer-link">光驱直读</a></li>
+      <li><a href="#manifesto" class="mobile-drawer-link">整张聆听</a></li>
+      <li><a href="#lyrics" class="mobile-drawer-link">逐字歌词</a></li>
+      <li><a href="#themes" class="mobile-drawer-link">黑白主题</a></li>
+      <li><a href="#library" class="mobile-drawer-link">专辑资料库</a></li>
+      <li><a href="#settings" class="mobile-drawer-link">偏好设置</a></li>
+    </ul>
+    <a href="https://github.com/JiAng10es/Discflow" target="_blank" rel="noopener noreferrer" class="btn btn--secondary" style="width: 100%;">
+      <i data-lucide="github" width="16" height="16"></i>
+      <span>查看 GitHub 仓库</span>
+    </a>
+  </div>
+
+  <main id="main-content">
+    <!-- 1. Hero Section -->
+    <section class="hero" id="hero">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <div class="container hero-inner">
+        <div class="hero-badge">
+          <span class="hero-badge-dot" aria-hidden="true"></span>
+          <span>Windows 原生 Hi-Fi CD 播放器 · 单文件便携</span>
         </div>
-      </div>
-      <div class="media-bleed">
-        <img class="bleed-img" src="assets/hero_fujii_player_dark.png" width="1440" height="900" alt="Discflow 播放主界面 - 藤井風《HELP EVER HURT NEVER》" />
+
+        <h1 class="hero-title">把实体唱片放回桌面中央</h1>
+
+        <p class="hero-subtitle">
+          放入光盘即可直接读取原盘音轨，也能将整张专辑无损归档为本地 WAV。没有流媒体压缩与算法插播，只留下唱片本来的声音与顺序。
+        </p>
+
+        <div class="hero-cta-row">
+          <a href="https://github.com/JiAng10es/Discflow/releases/latest/download/Discflow.exe" class="btn btn--primary btn--lg">
+            <i data-lucide="download" width="18" height="18"></i>
+            <span>下载 Windows 便携版</span>
+          </a>
+          <a href="#manifesto" class="btn btn--secondary btn--lg">
+            <span>了解设计理念</span>
+          </a>
+        </div>
+
+        <div class="media-frame">
+          <div class="media-toolbar">
+            <div class="segmented" role="tablist" aria-label="主视觉专辑视图切换">
+              <button type="button" class="seg-btn is-active" role="tab" aria-selected="true" data-hero-view="fujii">藤井風《HELP EVER HURT NEVER》</button>
+              <button type="button" class="seg-btn" role="tab" aria-selected="false" data-hero-view="tokyo">東京事変《大人》</button>
+            </div>
+            <span id="hero-showcase-caption" style="font-size:12.5px;color:var(--text-secondary);">藤井風《HELP EVER HURT NEVER》· 16-Bit / 44.1 kHz 光驱直读</span>
+          </div>
+          <img
+            id="hero-showcase-img"
+            src="assets/hero_fujii_player_dark.png"
+            width="1440"
+            height="900"
+            alt="Discflow 播放主界面 - 藤井風《HELP EVER HURT NEVER》"
+            data-zoomable
+          >
+        </div>
       </div>
     </section>
 
-    <!-- 2. 数字规格条（纯文字） -->
-    <section class="sec-stats">
-      <div class="stats-grid">
-        <div class="stat-item">
-          <span class="stat-val">16 Bit</span>
-          <span class="stat-lbl">CD-DA 原生未压缩位深</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-val">44.1 kHz</span>
-          <span class="stat-lbl">录音棚未重采样频率</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-val">0 次</span>
-          <span class="stat-lbl">数字转码与重采样损耗</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-val">13.9 MB</span>
-          <span class="stat-lbl">单文件便携免安装</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3. 宣言屏（纯文字，无图） -->
-    <section class="sec-manifesto" id="manifesto">
-      <div class="content-text">
-        <h2 class="manifesto-title">不抓轨。不压缩。<br>不打乱顺序。</h2>
-        <p class="manifesto-desc">实体唱片从第一轨到最后一轨的呼吸和段落感，不应该被流媒体算法打散。一整张专辑就是一个完整的艺术作品，放进托盘，从头听完。</p>
-      </div>
-    </section>
-
-    <!-- 4. 歌词章节（动效：动态逐字卡拉OK填充与滚动） -->
-    <section class="sec-lyrics-dynamic" id="lyrics">
-      <div class="content-text">
-        <div class="section-kicker">逐字同步歌词</div>
-        <h2 class="section-title">日文原文和中文<br>一起亮起来。</h2>
-        <p class="section-desc">三源匹配（QQ 音乐 / iTunes / 网易云），逐字高亮。<br>首创音节级渐变推移，当前演唱词句前向纠偏，平滑随声滚动。</p>
-      </div>
-      <div class="media-bleed">
-        <picture class="dynamic-karaoke-pic">
-          <source srcset="assets/lyrics_tokyo_player_dark.png" media="(prefers-reduced-motion: reduce)">
-          <img class="bleed-img" src="assets/lyrics_dynamic_karaoke.webp" width="1210" height="678" loading="lazy" alt="逐字歌词动态卡拉OK填充与滚动动效" />
-        </picture>
-      </div>
-    </section>
-
-    <!-- 5. 歌词静态 + 封面（东京事变《大人》） -->
-    <section class="sec-lyrics-static">
-      <div class="content-text">
-        <div class="section-kicker">全盘联动套用</div>
-        <h2 class="section-title">专辑识别出来，<br>整张的歌词一次性套用。</h2>
-        <p class="section-desc">放入光盘毫秒级匹配艺术封面与完整音轨清单。<br>日中双语严密对齐，左侧大尺寸唱片封面与右侧歌词同框并存。</p>
-      </div>
-      <div class="media-bleed">
-        <img class="bleed-img" src="assets/lyrics_tokyo_player_dark.png" width="1440" height="900" loading="lazy" alt="東京事変《大人》- 双语歌词与封面同框展示" />
-      </div>
-    </section>
-
-    <!-- 6. 浅色主题章节（配对展示深浅两套主题） -->
-    <section class="sec-themes" id="themes">
-      <div class="content-text">
-        <div class="section-kicker">外观主题</div>
-        <h2 class="section-title">深色沉浸，浅色明朗。<br>两套主题，同一套界面。</h2>
-        <p class="section-desc">严格适配系统深浅外观，亦可手动随心切换。<br>深色模式专注如临现场，浅色模式如羊脂玉般通透温润。</p>
-        <div class="theme-switcher-wrap">
-          <div class="theme-segmented">
-            <button class="theme-btn active" id="btnThemeLight" onclick="switchThemePreview('light')">浅色主题 (Light)</button>
-            <button class="theme-btn" id="btnThemeDark" onclick="switchThemePreview('dark')">深色主题 (Dark)</button>
+    <!-- 2. Original Specs Strip -->
+    <section class="stats-strip" aria-label="核心规格">
+      <div class="container">
+        <div class="stats-grid">
+          <div class="stat-cell">
+            <span class="stat-val">16 Bit</span>
+            <span class="stat-lbl">CD-DA 原生采样位深</span>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-val">44.1 kHz</span>
+            <span class="stat-lbl">红皮书标准原盘频率</span>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-val">0 损耗</span>
+            <span class="stat-lbl">光驱直读与 WAV 转录均不压缩</span>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-val">13.9 MB</span>
+            <span class="stat-lbl">单文件便携，免安装即开即听</span>
           </div>
         </div>
       </div>
-      <div class="media-bleed">
-        <div class="theme-preview-card active" id="themeCardLight">
-          <img class="bleed-img" src="assets/hero_fujii_player_light.png" width="1440" height="900" loading="lazy" alt="藤井風《HELP EVER HURT NEVER》浅色主题" />
-          <div style="height: 24px;"></div>
-          <img class="bleed-img" src="assets/lyrics_tokyo_player_light.png" width="1440" height="900" loading="lazy" alt="東京事変《大人》浅色主题双语歌词" />
+    </section>
+
+    <!-- 3. Manifesto (Consistent Logic: Read Direct + Rip Lossless WAV) -->
+    <section class="manifesto" id="manifesto">
+      <div class="container">
+        <h2 class="manifesto-title">直读原盘，也能无损留存整张专辑</h2>
+        <p class="manifesto-desc">
+          一张专辑从序曲到终章的起承转合，不该被拆成零散的单曲推荐。无论通过光驱直读即时开播，还是按音轨顺序归档成无损 WAV 随身收藏，Discflow 始终完整保留每一首曲目的位置与动态。
+        </p>
+      </div>
+    </section>
+
+    <!-- 4. Dynamic Karaoke Lyrics & Match -->
+    <section class="section" id="lyrics">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-kicker">
+            <i data-lucide="captions" width="14" height="14"></i>
+            <span>双语逐字歌词</span>
+          </div>
+          <h2 class="section-title">外语原文与中文译词同步滚动</h2>
+          <p class="section-desc">
+            整合 QQ 音乐、iTunes 与网易云三源词库，自动匹配并实现音节级逐字渐变高亮。遇到时间轴微差时，可直接在窗口内手动前后偏移校准。
+          </p>
         </div>
-        <div class="theme-preview-card" id="themeCardDark">
-          <img class="bleed-img" src="assets/hero_fujii_player_dark.png" width="1440" height="900" loading="lazy" alt="藤井風《HELP EVER HURT NEVER》深色主题" />
-          <div style="height: 24px;"></div>
-          <img class="bleed-img" src="assets/lyrics_tokyo_player_dark.png" width="1440" height="900" loading="lazy" alt="東京事変《大人》深色主题双语歌词" />
+
+        <div class="pair-grid">
+          <div class="pair-card">
+            <picture class="dynamic-karaoke-pic">
+              <source srcset="assets/lyrics_tokyo_player_dark.png" media="(prefers-reduced-motion: reduce)">
+              <img src="assets/lyrics_dynamic_karaoke.webp" width="1210" height="678" loading="lazy" alt="逐字歌词动态卡拉OK填充与滚动动效" data-zoomable>
+            </picture>
+            <div class="pair-caption">
+              <span>逐字歌词实时滚动演示</span>
+              <span style="font-family:var(--font-mono);font-size:11.5px;">QQ / iTunes / 网易云</span>
+            </div>
+          </div>
+
+          <div class="pair-card">
+            <img src="assets/lyric-match.jpg" width="880" height="926" loading="lazy" alt="Discflow 歌词检索与时间轴微调界面截图" data-zoomable>
+            <div class="pair-caption">
+              <span>多源歌词检索与时间轴纠偏</span>
+              <span style="font-family:var(--font-mono);font-size:11.5px;">毫秒级微调</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- 7. 资料库章节（四列唱片货架墙） -->
-    <section class="sec-library" id="library">
-      <div class="content-text">
-        <div class="section-kicker">本地无损资料库</div>
-        <h2 class="section-title">抓轨归档成 WAV，<br>封面歌词信息全存本地。<br>拔掉光驱也能听。</h2>
-        <p class="section-desc">四列自适应唱片陈列架，CD-DA 逐扇区无损转录。<br>整座实体唱片柜永久随身，支持整库打包迁移与即时检索。</p>
-      </div>
-      <div class="media-bleed">
-        <img class="bleed-img" src="assets/library_shelf_dark.png" width="1440" height="900" loading="lazy" alt="Discflow 实体唱片资料库 - 四列专辑货架墙" />
+    <!-- 5. Monochrome Dark / Light Theme Comparison -->
+    <section class="section" id="themes">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-kicker">
+            <i data-lucide="contrast" width="14" height="14"></i>
+            <span>黑白双主题</span>
+          </div>
+          <h2 class="section-title">暗夜沉静，浅色温润，自由切换</h2>
+          <p class="section-desc">
+            跟随系统深浅模式自动响应，也可一键手动切换。深色界面突出唱片封面与歌词光影，浅色界面如纸本封套般清朗耐看。
+          </p>
+          <div class="theme-controls">
+            <div class="segmented">
+              <button type="button" class="seg-btn is-active" data-theme-mode="dark" aria-pressed="true">深色主题 (Dark)</button>
+              <button type="button" class="seg-btn" data-theme-mode="light" aria-pressed="false">浅色主题 (Light)</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="theme-gallery is-active" id="theme-gallery-dark">
+          <div class="pair-card">
+            <img src="assets/hero_fujii_player_dark.png" width="1440" height="900" loading="lazy" alt="藤井風《HELP EVER HURT NEVER》深色主题" data-zoomable>
+            <div class="pair-caption">
+              <span>藤井風《HELP EVER HURT NEVER》</span>
+              <span style="font-family:var(--font-mono);font-size:11.5px;">Dark Mode</span>
+            </div>
+          </div>
+          <div class="pair-card">
+            <img src="assets/lyrics_tokyo_player_dark.png" width="1440" height="900" loading="lazy" alt="東京事変《大人》深色主题双语歌词" data-zoomable>
+            <div class="pair-caption">
+              <span>東京事変《大人》双语歌词</span>
+              <span style="font-family:var(--font-mono);font-size:11.5px;">Dark Mode</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="theme-gallery" id="theme-gallery-light">
+          <div class="pair-card">
+            <img src="assets/hero_fujii_player_light.png" width="1440" height="900" loading="lazy" alt="藤井風《HELP EVER HURT NEVER》浅色主题" data-zoomable>
+            <div class="pair-caption">
+              <span>藤井風《HELP EVER HURT NEVER》</span>
+              <span style="font-family:var(--font-mono);font-size:11.5px;">Light Mode</span>
+            </div>
+          </div>
+          <div class="pair-card">
+            <img src="assets/lyrics_tokyo_player_light.png" width="1440" height="900" loading="lazy" alt="東京事変《大人》浅色主题双语歌词" data-zoomable>
+            <div class="pair-caption">
+              <span>東京事変《大人》双语歌词</span>
+              <span style="font-family:var(--font-mono);font-size:11.5px;">Light Mode</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- 8. 自定义能力章节（系统偏好设置中心） -->
-    <section class="sec-settings" id="settings">
-      <div class="content-text">
-        <div class="section-kicker">系统偏好设置</div>
-        <h2 class="section-title">顶栏、Dock 的透明度<br>与模糊度都能调。</h2>
-        <p class="section-desc">固定 680×590 几何尺寸与滚动槽预留机制，切换四大分类毫无框体缩放或水平抽动。<br>高斯毛玻璃与底色透明度无级调谐，克制沉静，细节完全由你定义。</p>
-      </div>
-      <div class="media-bleed">
-        <img class="bleed-img" src="assets/settings_modal_dark.png" width="1440" height="900" loading="lazy" alt="Discflow 系统偏好设置中心 - 外观与界面调节面板" />
+    <!-- 6. Lossless Library & Cover Match -->
+    <section class="section" id="library">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-kicker">
+            <i data-lucide="library" width="14" height="14"></i>
+            <span>本地无损资料库</span>
+          </div>
+          <h2 class="section-title">归档成纯正 WAV，离线也能随时开听</h2>
+          <p class="section-desc">
+            逐扇区无损转录并连同封面、曲目表与双语歌词一并存入本地。四列陈列架支持多维度排序与即时检索，还能一键匹配高清专辑封套。
+          </p>
+        </div>
+
+        <div class="pair-grid">
+          <div class="pair-card">
+            <img src="assets/library.jpg" width="1400" height="885" loading="lazy" alt="Discflow 实体唱片资料库实机截图" data-zoomable>
+            <div class="pair-caption">
+              <span>本地无损唱片陈列架</span>
+              <span style="font-family:var(--font-mono);font-size:11.5px;">排序与快速检索</span>
+            </div>
+          </div>
+
+          <div class="pair-card">
+            <img src="assets/album-match.jpg" width="880" height="926" loading="lazy" alt="Discflow 专辑封面匹配界面截图" data-zoomable>
+            <div class="pair-caption">
+              <span>高清专辑封面一键匹配</span>
+              <span style="font-family:var(--font-mono);font-size:11.5px;">MusicBrainz / iTunes / 网易云</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- 9. CTA 屏（深色底，无图） -->
-    <section class="sec-cta">
-      <div class="content-text">
-        <h2 class="cta-title">唱片还在，声音也应该在。</h2>
-        <p class="cta-sub">纯净绿色单文件 · 即开即播 · 不写注册表 · 零流氓捆绑</p>
-        <div class="cta-actions">
-          <a class="btn-pill btn-pill-hero" href="https://github.com/JiAng10es/Discflow/releases/latest/download/Discflow.exe">下载 for Windows (13.9 MB)</a>
-          <a class="btn-pill btn-pill-secondary" href="https://github.com/JiAng10es/Discflow">在 GitHub 查看源码与仓库 ›</a>
+    <!-- 7. Preferences & Glass Parameters -->
+    <section class="section" id="settings">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-kicker">
+            <i data-lucide="sliders-horizontal" width="14" height="14"></i>
+            <span>系统偏好设置</span>
+          </div>
+          <h2 class="section-title">顶栏、Dock 的透明度与模糊度都能调</h2>
+          <p class="section-desc">
+            固定窗口比例与滚动槽预留机制，切换设置分类不会出现界面跳动。高斯模糊半径与背景透明度无级可调，把视觉分寸交给自己。
+          </p>
+        </div>
+
+        <div class="media-frame media-frame--narrow">
+          <img src="assets/settings.jpg" width="880" height="765" loading="lazy" alt="Discflow 系统偏好设置中心实机截图" data-zoomable>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. Final CTA (Raycast Obsidian Keyboard Backdrop) -->
+    <section class="cta-section">
+      <div class="keyboard-backdrop" aria-hidden="true">
+        <span class="keycap-bg">Q</span><span class="keycap-bg">W</span><span class="keycap-bg">E</span><span class="keycap-bg">R</span>
+        <span class="keycap-bg">T</span><span class="keycap-bg">Y</span><span class="keycap-bg">U</span><span class="keycap-bg">I</span>
+        <span class="keycap-bg">O</span><span class="keycap-bg">P</span><span class="keycap-bg">[</span><span class="keycap-bg">]</span>
+        <span class="keycap-bg">A</span><span class="keycap-bg">S</span><span class="keycap-bg">D</span><span class="keycap-bg">F</span>
+        <span class="keycap-bg">G</span><span class="keycap-bg">H</span><span class="keycap-bg">J</span><span class="keycap-bg">K</span>
+        <span class="keycap-bg">L</span><span class="keycap-bg">;</span><span class="keycap-bg">Space</span><span class="keycap-bg">Enter</span>
+        <span class="keycap-bg">Z</span><span class="keycap-bg">X</span><span class="keycap-bg">C</span><span class="keycap-bg">V</span>
+        <span class="keycap-bg">B</span><span class="keycap-bg">N</span><span class="keycap-bg">M</span><span class="keycap-bg">&lt;</span>
+        <span class="keycap-bg">&gt;</span><span class="keycap-bg">/</span><span class="keycap-bg">Ctrl</span><span class="keycap-bg">Alt</span>
+      </div>
+
+      <div class="container cta-content">
+        <h2 class="section-title" style="max-width:640px;margin:0 auto 14px;">让每一张收藏唱片重回日常播放</h2>
+        <p class="section-desc" style="max-width:520px;margin:0 auto 30px;">
+          绿色单文件便携 · 不写注册表 · 零广告零捆绑
+        </p>
+        <div class="hero-cta-row" style="margin-bottom:0;">
+          <a href="https://github.com/JiAng10es/Discflow/releases/latest/download/Discflow.exe" class="btn btn--primary btn--lg">
+            <i data-lucide="download" width="18" height="18"></i>
+            <span>下载 Windows 版 (13.9 MB)</span>
+          </a>
+          <a href="https://github.com/JiAng10es/Discflow" target="_blank" rel="noopener noreferrer" class="btn btn--secondary btn--lg">
+            <i data-lucide="github" width="18" height="18"></i>
+            <span>前往 GitHub 查看源码</span>
+          </a>
         </div>
         <div class="cta-meta">
-          <p>Windows 10 / 11 64 位 · 开源协议 <a href="https://github.com/JiAng10es/Discflow/blob/main/LICENSE" target="_blank" rel="noopener">CC BY-NC 4.0</a> · 项目开源于 <a href="https://github.com/JiAng10es/Discflow" target="_blank" rel="noopener">GitHub</a></p>
+          Windows 10 / 11 64 位 · 开源协议 <a href="https://github.com/JiAng10es/Discflow/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">CC BY-NC 4.0</a> · 开源于 <a href="https://github.com/JiAng10es/Discflow" target="_blank" rel="noopener noreferrer">GitHub</a>
         </div>
-
-        <!-- 网站底部实时浏览量小字行 -->
-        <div class="pv-counter-row">
-          <span>浏览量：</span>
-          <span class="pv-num" id="busuanzi_value_site_pv">...</span>
+        <div class="pv-row">
+          浏览量：<span id="busuanzi_value_site_pv">...</span>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- 极简轻量 PV 统计（不蒜子 + 客户端平滑保底） -->
-  <script>
-    function switchThemePreview(mode) {
-      const cardLight = document.getElementById('themeCardLight');
-      const cardDark = document.getElementById('themeCardDark');
-      const btnLight = document.getElementById('btnThemeLight');
-      const btnDark = document.getElementById('btnThemeDark');
-      if (mode === 'dark') {
-        cardLight.classList.remove('active');
-        cardDark.classList.add('active');
-        btnLight.classList.remove('active');
-        btnDark.classList.add('active');
-      } else {
-        cardDark.classList.remove('active');
-        cardLight.classList.add('active');
-        btnDark.classList.remove('active');
-        btnLight.classList.add('active');
-      }
-    }
+  <!-- Bottom Bar (Shares identical glass-bar parameters with Top Navbar) -->
+  <footer class="site-footer">
+    <div class="footer-pill glass-bar">
+      <a href="#hero" class="brand-link">
+        <img src="assets/icon.svg" alt="Discflow" class="brand-icon" width="22" height="22">
+        <span>Discflow</span>
+      </a>
 
-    // 实时浏览量统计（不蒜子与平滑递增保底）
-    (function initPvCounter() {
-      const pvEl = document.getElementById('busuanzi_value_site_pv');
-      if (!pvEl) return;
+      <div class="footer-links">
+        <a href="#hero">光驱直读</a>
+        <a href="#lyrics">逐字歌词</a>
+        <a href="#themes">黑白主题</a>
+        <a href="#library">专辑资料库</a>
+        <a href="#settings">偏好设置</a>
+        <a href="https://github.com/JiAng10es/Discflow" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
 
-      const LOCAL_KEY = 'discflow_site_pv_cache';
-      let currentVal = parseInt(localStorage.getItem(LOCAL_KEY) || '1280', 10);
-      currentVal += 1;
-      localStorage.setItem(LOCAL_KEY, String(currentVal));
-      pvEl.textContent = currentVal.toLocaleString('en-US');
+      <div class="footer-copy">Hi-Fi CD 播放器 · 开源免费</div>
+    </div>
+  </footer>
 
-      // 异步加载不蒜子
-      const script = document.createElement('script');
-      script.async = true;
-      script.src = '//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js';
-      script.onload = () => {
-        const observer = new MutationObserver(() => {
-          if (pvEl.textContent && pvEl.textContent !== '...' && !isNaN(parseInt(pvEl.textContent.replace(/,/g, ''), 10))) {
-            const remoteVal = parseInt(pvEl.textContent.replace(/,/g, ''), 10);
-            if (remoteVal > currentVal) {
-              localStorage.setItem(LOCAL_KEY, String(remoteVal));
-            }
-          }
-        });
-        observer.observe(pvEl, { childList: true, characterData: true });
-      };
-      document.body.appendChild(script);
-    })();
-  </script>
+  <!-- Lightbox Modal -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="软件截图高清预览">
+    <div class="lightbox-inner">
+      <button type="button" class="lightbox-close" id="lightbox-close" aria-label="关闭大图预览">
+        <i data-lucide="x" width="18" height="18"></i>
+      </button>
+      <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" id="lightbox-img" class="lightbox-img">
+    </div>
+  </div>
 </body>
 </html>
