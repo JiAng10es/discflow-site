@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Discflow — 献给实体唱片的 Windows 原生播放器</title>
-  <meta name="description" content="Discflow 是一款面向 Windows 的原生 Hi-Fi CD 与无损专辑播放器，支持光驱直读、WAV 无损归档、双语逐字歌词与黑白双主题。">
+  <meta name="description" content="Discflow v2.3.1 是一款面向 Windows 的原生 Hi-Fi CD 与无损专辑播放器，支持光驱直读、零拷贝 WAV 极速归档、双语逐字歌词、黑白双主题与应用内自更新。">
   <link rel="icon" type="image/svg+xml" href="assets/icon.svg?v=2">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,9 +35,9 @@
 
       <div class="nav-actions">
         <a href="https://github.com/JiAng10es/Discflow" target="_blank" rel="noopener noreferrer" class="nav-ghost-link">GitHub 源码</a>
-        <a href="https://github.com/JiAng10es/Discflow/releases/download/v2.0.7/Discflow.exe" class="btn btn--primary btn--sm">
+        <a href="https://github.com/JiAng10es/Discflow/releases/download/v2.3.1/Discflow.exe" class="btn btn--primary btn--sm">
           <i data-lucide="download" width="15" height="15"></i>
-          <span>下载 Windows 版</span>
+          <span>下载 v2.3.1</span>
         </a>
         <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" aria-label="打开导航菜单" aria-expanded="false" aria-controls="mobile-drawer">
           <i data-lucide="menu" width="18" height="18"></i>
@@ -69,19 +69,19 @@
       <div class="container hero-inner">
         <div class="hero-badge">
           <span class="hero-badge-dot" aria-hidden="true"></span>
-          <span>Windows 原生 Hi-Fi CD 播放器 · 单文件便携</span>
+          <span>Discflow v2.3.1 · Windows 10/11 单文件便携 · 应用内直下更新</span>
         </div>
 
         <h1 class="hero-title">把实体唱片放回桌面中央</h1>
 
         <p class="hero-subtitle">
-          放入光盘即可直接读取原盘音轨，也能将整张专辑无损归档为本地 WAV。没有流媒体压缩与算法插播，只留下唱片本来的声音与顺序。
+          放入光盘即可无损直读原盘音轨并无缝跨轨播放，也能以 64 扇区零拷贝归档为本地 WAV。无边框原生圆角窗体，只留下唱片本来的声音与顺序。
         </p>
 
         <div class="hero-cta-row">
-          <a href="https://github.com/JiAng10es/Discflow/releases/download/v2.0.7/Discflow.exe" class="btn btn--primary btn--lg">
+          <a href="https://github.com/JiAng10es/Discflow/releases/download/v2.3.1/Discflow.exe" class="btn btn--primary btn--lg">
             <i data-lucide="download" width="18" height="18"></i>
-            <span>下载 Windows 便携版</span>
+            <span>下载 Windows 便携版 (v2.3.1)</span>
           </a>
           <a href="#manifesto" class="btn btn--secondary btn--lg">
             <span>了解设计理念</span>
@@ -92,16 +92,16 @@
           <div class="media-toolbar">
             <div class="segmented" role="tablist" aria-label="主视觉专辑视图切换">
               <button type="button" class="seg-btn is-active" role="tab" aria-selected="true" data-hero-view="fujii">藤井風《HELP EVER HURT NEVER》</button>
-              <button type="button" class="seg-btn" role="tab" aria-selected="false" data-hero-view="tokyo">東京事変《大人》</button>
+              <button type="button" class="seg-btn" role="tab" aria-selected="false" data-hero-view="queue">曲目队列 · 一键重刷歌词</button>
             </div>
-            <span id="hero-showcase-caption" style="font-size:12.5px;color:var(--text-secondary);">藤井風《HELP EVER HURT NEVER》· 16-Bit / 44.1 kHz 光驱直读</span>
+            <span id="hero-showcase-caption" style="font-size:12.5px;color:var(--text-secondary);">藤井風《HELP EVER HURT NEVER》· 无边框圆角 · 16-Bit / 44.1 kHz</span>
           </div>
           <img
             id="hero-showcase-img"
             src="assets/hero_fujii_player_dark.png"
             width="1440"
             height="900"
-            alt="Discflow 播放主界面 - 藤井風《HELP EVER HURT NEVER》"
+            alt="Discflow v2.3.1 播放主界面 - 藤井風《HELP EVER HURT NEVER》"
             data-zoomable
           >
         </div>
@@ -117,16 +117,16 @@
             <span class="stat-lbl">CD-DA 原生采样位深</span>
           </div>
           <div class="stat-cell">
-            <span class="stat-val">44.1 kHz</span>
-            <span class="stat-lbl">红皮书标准原盘频率</span>
+            <span class="stat-val">Gapless</span>
+            <span class="stat-lbl">双缓冲内存预读无缝跨轨播放</span>
           </div>
           <div class="stat-cell">
-            <span class="stat-val">0 损耗</span>
-            <span class="stat-lbl">光驱直读与 WAV 转录均不压缩</span>
+            <span class="stat-val">64 扇区</span>
+            <span class="stat-lbl">零拷贝极速抓轨与划痕单扇区容错</span>
           </div>
           <div class="stat-cell">
-            <span class="stat-val">13.9 MB</span>
-            <span class="stat-lbl">单文件便携，免安装即开即听</span>
+            <span class="stat-val">14.6 MB</span>
+            <span class="stat-lbl">单文件便携，支持软件内自动更新</span>
           </div>
         </div>
       </div>
@@ -150,29 +150,26 @@
             <i data-lucide="captions" width="14" height="14"></i>
             <span>双语逐字歌词</span>
           </div>
-          <h2 class="section-title">外语原文与中文译词同步滚动</h2>
+          <h2 class="section-title">外语原文与中文译词同步逐字滚动</h2>
           <p class="section-desc">
-            整合 QQ 音乐、iTunes 与网易云三源词库，自动匹配并实现音节级逐字渐变高亮。遇到时间轴微差时，可直接在窗口内手动前后偏移校准。
+            整合网易云 <code>yrc</code>、QQ 音乐与 LRCLIB 多源词库，支持日文假名音拍 (Mora) 聚合分词与片头「作词 / 作曲」降噪展示，配合快捷键 <code>[</code> / <code>]</code> 毫秒级校准时间轴。
           </p>
         </div>
 
         <div class="pair-grid">
           <div class="pair-card">
-            <picture class="dynamic-karaoke-pic">
-              <source srcset="assets/lyrics_tokyo_player_dark.png" media="(prefers-reduced-motion: reduce)">
-              <img src="assets/lyrics_dynamic_karaoke.webp" width="1210" height="678" loading="lazy" alt="逐字歌词动态卡拉OK填充与滚动动效" data-zoomable>
-            </picture>
+            <img src="assets/lyrics_tokyo_player_dark.png" width="1440" height="900" loading="lazy" alt="Discflow 日文音拍逐字歌词与片头降噪实机截图" data-zoomable>
             <div class="pair-caption">
-              <span>逐字歌词实时滚动演示</span>
-              <span style="font-family:var(--font-mono);font-size:11.5px;">QQ / iTunes / 网易云</span>
+              <span>音拍级逐字高亮与片头信息降噪</span>
+              <span style="font-family:var(--font-mono);font-size:11.5px;">网易云 yrc / QQ / LRCLIB</span>
             </div>
           </div>
 
           <div class="pair-card">
-            <img src="assets/lyric-match.jpg" width="880" height="926" loading="lazy" alt="Discflow 歌词检索与时间轴微调界面截图" data-zoomable>
+            <img src="assets/album_match_dark.png" width="1440" height="900" loading="lazy" alt="Discflow 三源专辑与曲目智能匹配界面截图" data-zoomable>
             <div class="pair-caption">
-              <span>多源歌词检索与时间轴纠偏</span>
-              <span style="font-family:var(--font-mono);font-size:11.5px;">毫秒级微调</span>
+              <span>三源专辑匹配 · 自动补齐曲目 ID</span>
+              <span style="font-family:var(--font-mono);font-size:11.5px;">一键整碟升级歌词</span>
             </div>
           </div>
         </div>
@@ -208,9 +205,9 @@
             </div>
           </div>
           <div class="pair-card">
-            <img src="assets/lyrics_tokyo_player_dark.png" width="1440" height="900" loading="lazy" alt="東京事変《大人》深色主题双语歌词" data-zoomable>
+            <img src="assets/lyrics_tokyo_player_dark.png" width="1440" height="900" loading="lazy" alt="椎名林檎《無罪モラトリアム》深色主题双语歌词" data-zoomable>
             <div class="pair-caption">
-              <span>東京事変《大人》双语歌词</span>
+              <span>椎名林檎《無罪モラトリアム》双语歌词</span>
               <span style="font-family:var(--font-mono);font-size:11.5px;">Dark Mode</span>
             </div>
           </div>
@@ -225,9 +222,9 @@
             </div>
           </div>
           <div class="pair-card">
-            <img src="assets/lyrics_tokyo_player_light.png" width="1440" height="900" loading="lazy" alt="東京事変《大人》浅色主题双语歌词" data-zoomable>
+            <img src="assets/lyrics_tokyo_player_light.png" width="1440" height="900" loading="lazy" alt="椎名林檎《無罪モラトリアム》浅色主题双语歌词" data-zoomable>
             <div class="pair-caption">
-              <span>東京事変《大人》双语歌词</span>
+              <span>椎名林檎《無罪モラトリアム》双语歌词</span>
               <span style="font-family:var(--font-mono);font-size:11.5px;">Light Mode</span>
             </div>
           </div>
@@ -243,26 +240,26 @@
             <i data-lucide="library" width="14" height="14"></i>
             <span>本地无损资料库</span>
           </div>
-          <h2 class="section-title">归档成纯正 WAV，离线也能随时开听</h2>
+          <h2 class="section-title">零拷贝极速抓轨，归档为纯正 WAV</h2>
           <p class="section-desc">
-            逐扇区无损转录并连同封面、曲目表与双语歌词一并存入本地。四列陈列架支持多维度排序与即时检索，还能一键匹配高清专辑封套。
+            64 扇区大批量直读配合 1MB 流式缓冲写入，抓轨期间自动隔离巡检与播放竞争并实时展示倍速与速率。四列黑胶陈列架支持即时搜索、ZIP 备份与离线无损回放。
           </p>
         </div>
 
         <div class="pair-grid">
           <div class="pair-card">
-            <img src="assets/library.jpg" width="1400" height="885" loading="lazy" alt="Discflow 实体唱片资料库实机截图" data-zoomable>
+            <img src="assets/library_shelf_dark.png" width="1440" height="900" loading="lazy" alt="Discflow v2.3.1 四列黑胶资料库实机截图" data-zoomable>
             <div class="pair-caption">
               <span>本地无损唱片陈列架</span>
-              <span style="font-family:var(--font-mono);font-size:11.5px;">排序与快速检索</span>
+              <span style="font-family:var(--font-mono);font-size:11.5px;">四列货架 · 即时检索</span>
             </div>
           </div>
 
           <div class="pair-card">
-            <img src="assets/album-match.jpg" width="880" height="926" loading="lazy" alt="Discflow 专辑封面匹配界面截图" data-zoomable>
+            <img src="assets/rip_modal_dark.png" width="1440" height="900" loading="lazy" alt="Discflow 极速 CD 抓轨与实时倍速弹窗截图" data-zoomable>
             <div class="pair-caption">
-              <span>高清专辑封面一键匹配</span>
-              <span style="font-family:var(--font-mono);font-size:11.5px;">MusicBrainz / iTunes / 网易云</span>
+              <span>无损 WAV 极速抓轨归档</span>
+              <span style="font-family:var(--font-mono);font-size:11.5px;">实时倍速 · 划痕单扇区容错</span>
             </div>
           </div>
         </div>
@@ -277,14 +274,28 @@
             <i data-lucide="sliders-horizontal" width="14" height="14"></i>
             <span>系统偏好设置</span>
           </div>
-          <h2 class="section-title">顶栏、Dock 的透明度与模糊度都能调</h2>
+          <h2 class="section-title">macOS 分栏设置与应用内直下更新</h2>
           <p class="section-desc">
-            固定窗口比例与滚动槽预留机制，切换设置分类不会出现界面跳动。高斯模糊半径与背景透明度无级可调，把视觉分寸交给自己。
+            700×540 左侧分栏导航划分「外观与歌词 / 播放与硬件 / 存储与数据 / 关于 Discflow」，支持滑块透视预览底栏透明度；检测到新版本后直接在软件内下载覆盖并自动重启。
           </p>
         </div>
 
-        <div class="media-frame media-frame--narrow">
-          <img src="assets/settings.jpg" width="880" height="765" loading="lazy" alt="Discflow 系统偏好设置中心实机截图" data-zoomable>
+        <div class="pair-grid">
+          <div class="pair-card">
+            <img src="assets/settings_modal_dark.png" width="1440" height="900" loading="lazy" alt="Discflow macOS 分栏式系统偏好设置（深色主题）" data-zoomable>
+            <div class="pair-caption">
+              <span>分栏设置 · 外观与玻璃参数</span>
+              <span style="font-family:var(--font-mono);font-size:11.5px;">滑块实时透视预览</span>
+            </div>
+          </div>
+
+          <div class="pair-card">
+            <img src="assets/settings_update_light.png" width="1440" height="900" loading="lazy" alt="Discflow 应用内自动检测更新与一键覆盖安装（浅色主题）" data-zoomable>
+            <div class="pair-caption">
+              <span>关于与更新 · 软件内直下安装</span>
+              <span style="font-family:var(--font-mono);font-size:11.5px;">PE 校验 · 静默重启</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -309,9 +320,9 @@
           绿色单文件便携 · 不写注册表 · 零广告零捆绑
         </p>
         <div class="hero-cta-row" style="margin-bottom:0;">
-          <a href="https://github.com/JiAng10es/Discflow/releases/download/v2.0.7/Discflow.exe" class="btn btn--primary btn--lg">
+          <a href="https://github.com/JiAng10es/Discflow/releases/download/v2.3.1/Discflow.exe" class="btn btn--primary btn--lg">
             <i data-lucide="download" width="18" height="18"></i>
-            <span>下载 Windows 版 (13.9 MB)</span>
+            <span>下载 Windows 版 (v2.3.1 · 14.6 MB)</span>
           </a>
           <a href="https://github.com/JiAng10es/Discflow" target="_blank" rel="noopener noreferrer" class="btn btn--secondary btn--lg">
             <i data-lucide="github" width="18" height="18"></i>

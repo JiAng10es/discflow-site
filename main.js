@@ -28,17 +28,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 2. Hero Showcase Switcher (Fujii Kaze & Tokyo Jihen)
+  // 2. Hero Showcase Switcher (Fujii Kaze & Queue Refresh)
   const heroViews = {
     fujii: {
       src: 'assets/hero_fujii_player_dark.png',
-      alt: 'Discflow 播放主界面 - 藤井風《HELP EVER HURT NEVER》',
-      caption: '藤井風《HELP EVER HURT NEVER》· 16-Bit / 44.1 kHz 光驱直读'
+      alt: 'Discflow v2.3.1 播放主界面 - 藤井風《HELP EVER HURT NEVER》',
+      caption: '藤井風《HELP EVER HURT NEVER》· 无边框圆角 · 16-Bit / 44.1 kHz'
     },
-    tokyo: {
-      src: 'assets/lyrics_tokyo_player_dark.png',
-      alt: 'Discflow 播放主界面 - 東京事変《大人》双语歌词同步',
-      caption: '東京事変《大人》· 双语逐字歌词与专辑封面同框'
+    queue: {
+      src: 'assets/queue_refresh_dark.png',
+      alt: 'Discflow v2.3.1 曲目队列与一键重刷歌词界面',
+      caption: '曲目队列 · 支持整碟一键「重刷歌词」与三源专辑匹配'
     }
   };
 
